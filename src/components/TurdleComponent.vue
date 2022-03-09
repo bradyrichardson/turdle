@@ -1,80 +1,111 @@
 <template>
   <div class="turdle">
     <div class="turtle-image">
-      <img src="/" />
-      <p>What is this animal's name?</p>
+      <img src="../assets/turtle.jpg" />
+      <p>What is this turtle's name?</p>
     </div>
     <div class="answer-grid">
       <div class="tile-row">
-        <div class="grid-tile correct">{{ letter }}</div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
+        <div v-for="tile in this.grid[0]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
       </div>
       <div class="tile-row">
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
+        <div v-for="tile in this.grid[1]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
       </div>
       <div class="tile-row">
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
+        <div v-for="tile in this.grid[2]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
       </div>
       <div class="tile-row">
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
+        <div v-for="tile in this.grid[3]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
       </div>
       <div class="tile-row">
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
-        <div class="grid-tile"></div>
+        <div v-for="tile in this.grid[4]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
+      </div>
+      <div class="tile-row">
+        <div v-for="tile in this.grid[5]" :key="tile['number']">
+          <div :class="tile.class" class="unmarked">
+            <strong>
+              <div :class="tile.class">{{ tile.letter }}</div>
+            </strong>
+          </div>
+        </div>
       </div>
     </div>
     <form class="keyboard">
       <div class="keyboard-row">
-        <button @click.prevent="markTile('Q')">Q</button>
-        <button @click.prevent="markTile('W')">W</button>
-        <button @click.prevent="markTile('E')">E</button>
-        <button @click.prevent="markTile('R')">R</button>
-        <button @click.prevent="markTile('T')">T</button>
-        <button @click.prevent="markTile('Y')">Y</button>
-        <button>U</button>
-        <button>I</button>
-        <button>O</button>
-        <button>P</button>
+        <button class="keyboard-key" @click.prevent="markTile('Q')">Q</button>
+        <button class="keyboard-key" @click.prevent="markTile('W')">W</button>
+        <button class="keyboard-key" @click.prevent="markTile('E')">E</button>
+        <button class="keyboard-key" @click.prevent="markTile('R')">R</button>
+        <button class="keyboard-key" @click.prevent="markTile('T')">T</button>
+        <button class="keyboard-key" @click.prevent="markTile('Y')">Y</button>
+        <button class="keyboard-key" @click.prevent="markTile('U')">U</button>
+        <button class="keyboard-key" @click.prevent="markTile('I')">I</button>
+        <button class="keyboard-key" @click.prevent="markTile('O')">O</button>
+        <button class="keyboard-key" @click.prevent="markTile('P')">P</button>
       </div>
       <div class="keyboard-row">
-        <button>A</button>
-        <button>S</button>
-        <button>D</button>
-        <button>F</button>
-        <button>G</button>
-        <button>H</button>
-        <button>J</button>
-        <button>K</button>
-        <button>L</button>
+        <button class="keyboard-key" @click.prevent="markTile('A')">A</button>
+        <button class="keyboard-key" @click.prevent="markTile('S')">S</button>
+        <button class="keyboard-key" @click.prevent="markTile('D')">D</button>
+        <button class="keyboard-key" @click.prevent="markTile('F')">F</button>
+        <button class="keyboard-key" @click.prevent="markTile('G')">G</button>
+        <button class="keyboard-key" @click.prevent="markTile('H')">H</button>
+        <button class="keyboard-key" @click.prevent="markTile('J')">J</button>
+        <button class="keyboard-key" @click.prevent="markTile('K')">K</button>
+        <button class="keyboard-key" @click.prevent="markTile('L')">L</button>
       </div>
       <div class="keyboard-row">
-        <button id="big-button1">Enter</button>
-        <button>Z</button>
-        <button>X</button>
-        <button>C</button>
-        <button>V</button>
-        <button>B</button>
-        <button>N</button>
-        <button>M</button>
-        <button id="big-button2" @click.prevent="removeLetter">Delete</button>
+        <button
+          class="keyboard-key"
+          id="big-button1"
+          @click.prevent="enterAnswer"
+        >
+          Enter
+        </button>
+        <button class="keyboard-key" @click.prevent="markTile('Z')">Z</button>
+        <button class="keyboard-key" @click.prevent="markTile('X')">X</button>
+        <button class="keyboard-key" @click.prevent="markTile('C')">C</button>
+        <button class="keyboard-key" @click.prevent="markTile('V')">V</button>
+        <button class="keyboard-key" @click.prevent="markTile('B')">B</button>
+        <button class="keyboard-key" @click.prevent="markTile('N')">N</button>
+        <button class="keyboard-key" @click.prevent="markTile('M')">M</button>
+        <button
+          class="keyboard-key"
+          id="big-button2"
+          @click.prevent="removeLetter"
+        >
+          Delete
+        </button>
       </div>
     </form>
   </div>
@@ -82,61 +113,128 @@
 
 <script>
 export default {
-  props: {
-    msg: String,
-  },
   data() {
     return {
-      letter: "",
-      current: 1,
-      grid: [
-        { class: "grid-tile", letter: "", number: 1 },
-        { class: "grid-tile", letter: "", number: 2 },
-        { class: "grid-tile", letter: "", number: 3 },
-        { class: "grid-tile", letter: "", number: 4 },
-        { class: "grid-tile", letter: "", number: 5 },
-        { class: "grid-tile", letter: "", number: 6 },
-        { class: "grid-tile", letter: "", number: 7 },
-        { class: "grid-tile", letter: "", number: 8 },
-        { class: "grid-tile", letter: "", number: 9 },
-        { class: "grid-tile", letter: "", number: 10 },
-        { class: "grid-tile", letter: "", number: 11 },
-        { class: "grid-tile", letter: "", number: 12 },
-        { class: "grid-tile", letter: "", number: 13 },
-        { class: "grid-tile", letter: "", number: 14 },
-        { class: "grid-tile", letter: "", number: 15 },
-        { class: "grid-tile", letter: "", number: 16 },
-        { class: "grid-tile", letter: "", number: 17 },
-        { class: "grid-tile", letter: "", number: 18 },
-        { class: "grid-tile", letter: "", number: 19 },
-        { class: "grid-tile", letter: "", number: 20 },
-        { class: "grid-tile", letter: "", number: 21 },
-        { class: "grid-tile", letter: "", number: 22 },
-        { class: "grid-tile", letter: "", number: 23 },
-        { class: "grid-tile", letter: "", number: 24 },
-        { class: "grid-tile", letter: "", number: 25 },
-      ],
       answer: "JAMES",
-      guess: "",
-      guesses: [],
+      letter: "",
+      currentRow: 0,
+      currentTile: 0,
+      grid: [
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+        [
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+          { class: "grid-tile", letter: "" },
+        ],
+      ],
     };
   },
   methods: {
     markTile(value) {
-      this.letter = value;
-      this.current++;
-      console.log(this.current);
-      this.grid[this.current]["class"] = "grid-tile correct";
-      console.log(this.grid[this.current]["class"]);
-      return this.current;
+      //FIXME last tile should be deleted before it is changeable
+      console.log(this.currentTile);
+      if (this.grid[this.currentRow][this.currentTile]["letter"] !== "") {
+        if (this.currentTile < 4) {
+          this.currentTile++;
+        }
+      }
+      this.grid[this.currentRow][this.currentTile]["letter"] = value;
+      this.grid[this.currentRow][this.currentTile]["class"] =
+        "grid-tile marked";
+      if (this.currentTile < 4) {
+        this.currentTile++;
+      }
     },
     removeLetter() {
-      if (this.current === 1) {
-        console.log("Empty");
+      console.log(this.currentTile);
+      if (this.currentTile > 4) {
+        this.currentTile = 4;
+      }
+      if (this.currentTile === 0) {
+        this.grid[this.currentRow][this.currentTile]["letter"] = "";
+        this.grid[this.currentRow][this.currentTile]["class"] = "grid-tile";
         return;
       }
-      this.current--;
-      console.log(this.current);
+      if (this.grid[this.currentRow][this.currentTile]["letter"] === "") {
+        this.grid[this.currentRow][this.currentTile]["class"] = "grid-tile";
+        if (this.currentTile > 0) {
+          this.currentTile--;
+        }
+      }
+      this.grid[this.currentRow][this.currentTile]["letter"] = "";
+      this.grid[this.currentRow][this.currentTile]["class"] = "grid-tile";
+      if (this.currentTile > 0) {
+        this.currentTile--;
+      }
+      console.log(this.currentTile);
+    },
+    enterAnswer() {
+      if (
+        this.currentTile < 4 ||
+        this.grid[this.currentRow][4]["letter"] === ""
+      ) {
+        console.log("Not a valid answer");
+        return;
+      }
+      var answerKey = this.answer.split("");
+      console.log(answerKey);
+      for (var i = 0; i < answerKey.length; i++) {
+        if (this.grid[this.currentRow][i]["letter"] === answerKey[i]) {
+          this.grid[this.currentRow][i]["class"] = "grid-tile marked correct";
+          answerKey[i] = " ";
+        }
+      }
+      for (i = 0; i < answerKey.length; i++) {
+        if (answerKey.includes(this.grid[this.currentRow][i]["letter"])) {
+          this.grid[this.currentRow][i]["class"] = "grid-tile marked partial";
+          answerKey[
+            answerKey.indexOf(this.grid[this.currentRow][i]["letter"])
+          ] = " ";
+        }
+      }
+      for (i = 0; i < answerKey.length; i++) {
+        if (this.grid[this.currentRow][i]["class"] === "grid-tile marked") {
+          this.grid[this.currentRow][i]["class"] = "grid-tile marked incorrect";
+        }
+      }
+      this.currentRow++;
+      this.currentTile = 0;
     },
   },
 };
@@ -149,6 +247,11 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+
+img {
+  border-radius: 100px;
+}
+
 .answer-grid {
   margin-bottom: 100px;
 }
@@ -161,25 +264,22 @@ export default {
   align-items: center;
   height: 60px;
   width: 60px;
-  background-color: grey;
+  background-color: #fff;
   border: solid 2px black;
   margin: 0 5px 5px 0;
-  color: white;
-}
-.keyboard {
-  background-color: green;
+  color: #000;
+  font-size: 30px;
 }
 .keyboard-row {
   width: 100%;
 }
-.keyboard-row button {
+.keyboard-key {
   margin: 2px;
   height: 50px;
   width: 40px;
   border-radius: 5px;
   background-color: white;
   color: grey;
-  font: bold 30px; /*FIXME font not working*/
 }
 .big-button {
   width: 100px;
@@ -188,8 +288,23 @@ export default {
 #big-button2 {
   width: 50px;
 }
+.marked {
+  border-radius: 10px;
+}
+.incorrect {
+  background-color: grey;
+  color: #fff;
+}
+.partial {
+  background-color: #e1ad01;
+  color: #fff;
+}
 .correct {
   background-color: green;
+  color: #fff;
+}
+.unmarked {
+  background-color: #fff;
 }
 
 @media only screen and (max-width: 400px) {
