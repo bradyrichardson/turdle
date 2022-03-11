@@ -62,48 +62,29 @@
     </div>
     <form class="keyboard">
       <div class="keyboard-row">
-        <button class="keyboard-key" @click.prevent="markTile('Q')">Q</button>
-        <button class="keyboard-key" @click.prevent="markTile('W')">W</button>
-        <button class="keyboard-key" @click.prevent="markTile('E')">E</button>
-        <button class="keyboard-key" @click.prevent="markTile('R')">R</button>
-        <button class="keyboard-key" @click.prevent="markTile('T')">T</button>
-        <button class="keyboard-key" @click.prevent="markTile('Y')">Y</button>
-        <button class="keyboard-key" @click.prevent="markTile('U')">U</button>
-        <button class="keyboard-key" @click.prevent="markTile('I')">I</button>
-        <button class="keyboard-key" @click.prevent="markTile('O')">O</button>
-        <button class="keyboard-key" @click.prevent="markTile('P')">P</button>
+        <div v-for="key in this.keyboard[0]" :key="key['letterKey']">
+          <button :class="key.class" @click.prevent="markTile(key.letterKey)">
+            {{ key.letterKey }}
+          </button>
+        </div>
       </div>
       <div class="keyboard-row">
-        <button class="keyboard-key" @click.prevent="markTile('A')">A</button>
-        <button class="keyboard-key" @click.prevent="markTile('S')">S</button>
-        <button class="keyboard-key" @click.prevent="markTile('D')">D</button>
-        <button class="keyboard-key" @click.prevent="markTile('F')">F</button>
-        <button class="keyboard-key" @click.prevent="markTile('G')">G</button>
-        <button class="keyboard-key" @click.prevent="markTile('H')">H</button>
-        <button class="keyboard-key" @click.prevent="markTile('J')">J</button>
-        <button class="keyboard-key" @click.prevent="markTile('K')">K</button>
-        <button class="keyboard-key" @click.prevent="markTile('L')">L</button>
+        <div v-for="key in this.keyboard[1]" :key="key['letterKey']">
+          <button :class="key.class" @click.prevent="markTile(key.letterKey)">
+            {{ key.letterKey }}
+          </button>
+        </div>
       </div>
       <div class="keyboard-row">
-        <button
-          class="keyboard-key"
-          id="big-button1"
-          @click.prevent="enterAnswer"
-        >
+        <button class="keyboard-key big-button" @click.prevent="enterAnswer">
           Enter
         </button>
-        <button class="keyboard-key" @click.prevent="markTile('Z')">Z</button>
-        <button class="keyboard-key" @click.prevent="markTile('X')">X</button>
-        <button class="keyboard-key" @click.prevent="markTile('C')">C</button>
-        <button class="keyboard-key" @click.prevent="markTile('V')">V</button>
-        <button class="keyboard-key" @click.prevent="markTile('B')">B</button>
-        <button class="keyboard-key" @click.prevent="markTile('N')">N</button>
-        <button class="keyboard-key" @click.prevent="markTile('M')">M</button>
-        <button
-          class="keyboard-key"
-          id="big-button2"
-          @click.prevent="removeLetter"
-        >
+        <div v-for="key in this.keyboard[2]" :key="key['letterKey']">
+          <button :class="key.class" @click.prevent="markTile(key.letterKey)">
+            {{ key.letterKey }}
+          </button>
+        </div>
+        <button class="keyboard-key big-button" @click.prevent="removeLetter">
           Delete
         </button>
       </div>
@@ -163,6 +144,40 @@ export default {
           { class: "grid-tile", letter: "" },
         ],
       ],
+      keyboard: [
+        [
+          { letterKey: "Q", class: "keyboard-key" },
+          { letterKey: "W", class: "keyboard-key" },
+          { letterKey: "E", class: "keyboard-key" },
+          { letterKey: "R", class: "keyboard-key" },
+          { letterKey: "T", class: "keyboard-key" },
+          { letterKey: "Y", class: "keyboard-key" },
+          { letterKey: "U", class: "keyboard-key" },
+          { letterKey: "I", class: "keyboard-key" },
+          { letterKey: "O", class: "keyboard-key" },
+          { letterKey: "P", class: "keyboard-key" },
+        ],
+        [
+          { letterKey: "A", class: "keyboard-key" },
+          { letterKey: "S", class: "keyboard-key" },
+          { letterKey: "D", class: "keyboard-key" },
+          { letterKey: "F", class: "keyboard-key" },
+          { letterKey: "G", class: "keyboard-key" },
+          { letterKey: "H", class: "keyboard-key" },
+          { letterKey: "J", class: "keyboard-key" },
+          { letterKey: "K", class: "keyboard-key" },
+          { letterKey: "L", class: "keyboard-key" },
+        ],
+        [
+          { letterKey: "Z", class: "keyboard-key" },
+          { letterKey: "X", class: "keyboard-key" },
+          { letterKey: "C", class: "keyboard-key" },
+          { letterKey: "V", class: "keyboard-key" },
+          { letterKey: "B", class: "keyboard-key" },
+          { letterKey: "N", class: "keyboard-key" },
+          { letterKey: "M", class: "keyboard-key" },
+        ],
+      ],
     };
   },
   methods: {
@@ -204,6 +219,15 @@ export default {
       }
       console.log(this.currentTile);
     },
+    markKey(key, newClass) {
+      for (var i = 0; i < this.keyboard.length; i++) {
+        for (var j = 0; j < this.keyboard[i].length; j++) {
+          if (this.keyboard[i][j]["letterKey"] === key) {
+            this.keyboard[i][j]["class"] += " " + newClass;
+          }
+        }
+      }
+    },
     enterAnswer() {
       if (
         this.currentTile < 4 ||
@@ -213,24 +237,40 @@ export default {
         return;
       }
       var answerKey = this.answer.split("");
-      console.log(answerKey);
+      var answerEntry = []; //need this for marking incorrect keys
       for (var i = 0; i < answerKey.length; i++) {
+        answerEntry.push(this.grid[this.currentRow][i]["letter"]);
         if (this.grid[this.currentRow][i]["letter"] === answerKey[i]) {
           this.grid[this.currentRow][i]["class"] = "grid-tile marked correct";
+          var setClass = "correct";
+          this.markKey(answerKey[i], setClass);
           answerKey[i] = " ";
+          answerEntry[i] = " ";
         }
       }
       for (i = 0; i < answerKey.length; i++) {
         if (answerKey.includes(this.grid[this.currentRow][i]["letter"])) {
           this.grid[this.currentRow][i]["class"] = "grid-tile marked partial";
+          setClass = "partial";
+          var answerKeyArg = this.grid[this.currentRow][i]["letter"];
+          this.markKey(answerKeyArg, setClass);
           answerKey[
             answerKey.indexOf(this.grid[this.currentRow][i]["letter"])
+          ] = " ";
+          answerEntry[
+            answerEntry.indexOf(this.grid[this.currentRow][i]["letter"])
           ] = " ";
         }
       }
       for (i = 0; i < answerKey.length; i++) {
         if (this.grid[this.currentRow][i]["class"] === "grid-tile marked") {
           this.grid[this.currentRow][i]["class"] = "grid-tile marked incorrect";
+        }
+      }
+      setClass = "incorrect";
+      for (i = 0; i < answerEntry.length; i++) {
+        if (answerEntry[i] !== " ") {
+          this.markKey(answerEntry[i], setClass);
         }
       }
       this.currentRow++;
@@ -250,6 +290,7 @@ export default {
 
 img {
   border-radius: 100px;
+  border: solid 3px #000;
 }
 
 .answer-grid {
@@ -272,6 +313,9 @@ img {
 }
 .keyboard-row {
   width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .keyboard-key {
   margin: 2px;
@@ -282,11 +326,7 @@ img {
   color: grey;
 }
 .big-button {
-  width: 100px;
-}
-#big-button1,
-#big-button2 {
-  width: 50px;
+  width: 70px;
 }
 .marked {
   border-radius: 10px;
