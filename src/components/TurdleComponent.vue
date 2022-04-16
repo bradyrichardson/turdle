@@ -93,13 +93,18 @@
 </template>
 
 <script>
+import namesArray from "../names.vue";
+import seedrandom from "seedrandom";
+
 export default {
   data() {
     return {
-      answer: "JAMES",
+      answer: "",
       letter: "",
       currentRow: 0,
       currentTile: 0,
+      finished: false,
+      winner: false,
       grid: [
         [
           { class: "grid-tile", letter: "" },
@@ -180,10 +185,48 @@ export default {
       ],
     };
   },
+  created() {
+    this.getDayName();
+  },
+  computed: {
+    lock() {
+      if (
+        this.currentTile === 4 ||
+        this.currentTile === 9 ||
+        this.currentTile === 14 ||
+        this.currentTile === 19 ||
+        this.currentTile === 24 ||
+        this.currentTile === 29
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    userAnswer() {
+      let name = "";
+      for (let keyObj of this.grid[this.currentRow]) {
+        name += keyObj.letter;
+      }
+      return name;
+    },
+  },
   methods: {
+    getDayName() {
+      var today = new Date();
+      var hashDay =
+        today.getDate() * 31 + today.getMonth() * 31 + today.getYear() * 31;
+      var rng = seedrandom(hashDay);
+      var hashIndex = Math.floor((rng() * 100000) % namesArray.length);
+      this.answer = namesArray[hashIndex].toUpperCase();
+    },
     markTile(value) {
-      //FIXME last tile should be deleted before it is changeable
-      console.log(this.currentTile);
+      if (
+        this.lock === true &&
+        this.grid[this.currentRow][this.currentTile].letter !== ""
+      ) {
+        return;
+      }
       if (this.grid[this.currentRow][this.currentTile]["letter"] !== "") {
         if (this.currentTile < 4) {
           this.currentTile++;
@@ -197,7 +240,6 @@ export default {
       }
     },
     removeLetter() {
-      console.log(this.currentTile);
       if (this.currentTile > 4) {
         this.currentTile = 4;
       }
@@ -217,7 +259,6 @@ export default {
       if (this.currentTile > 0) {
         this.currentTile--;
       }
-      console.log(this.currentTile);
     },
     markKey(key, newClass) {
       for (var i = 0; i < this.keyboard.length; i++) {
@@ -233,7 +274,15 @@ export default {
         this.currentTile < 4 ||
         this.grid[this.currentRow][4]["letter"] === ""
       ) {
-        console.log("Not a valid answer");
+        alert("Not a valid answer.");
+        return;
+      }
+      if (
+        !namesArray.some(
+          (name) => name.toLowerCase() === this.userAnswer.toLowerCase()
+        )
+      ) {
+        alert("Not a valid answer.");
         return;
       }
       var answerKey = this.answer.split("");
@@ -273,8 +322,77 @@ export default {
           this.markKey(answerEntry[i], setClass);
         }
       }
+      if (this.userAnswer.toLowerCase() === this.answer.toLowerCase()) {
+        this.winner = true;
+        this.saveResults();
+      }
+      if (this.currentRow === 5) {
+        this.saveResults();
+      }
       this.currentRow++;
       this.currentTile = 0;
+    },
+    saveResults() {
+      this.finished = true;
+      if (this.winner === true) {
+        //track winstreak
+        let winStreakExists = localStorage.getItem("winStreak");
+        let winStreak = winStreakExists
+          ? String(Number(winStreakExists) + 1)
+          : "1";
+        localStorage.setItem("winStreak", winStreak);
+        //track bestStreak
+        let bestStreakExists = localStorage.getItem("bestStreak");
+        if (bestStreakExists) {
+          if (
+            Number(localStorage.getItem("winStreak")) > Number(bestStreakExists)
+          ) {
+            let bestStreak = localStorage.getItem("winStreak");
+            localStorage.setItem("bestStreak", bestStreak);
+          }
+        } else {
+          let bestStreak = localStorage.getItem("winStreak");
+          localStorage.setItem("bestStreak", bestStreak);
+        }
+        //track num of tries for each attempt
+        let attemptsExist = localStorage.getItem("attemptsWon");
+        if (attemptsExist) {
+          attemptsExist = attemptsExist.split(",");
+          let num = Number(attemptsExist[this.currentRow]);
+          num += 1;
+          attemptsExist[this.currentRow] = String(num);
+          attemptsExist = String(attemptsExist);
+          localStorage.setItem("attemptsWon", attemptsExist);
+        } else {
+          let attemptsArray = new Array(6).fill(0);
+          attemptsArray[this.currentRow] += 1;
+          attemptsArray = String(attemptsArray);
+          localStorage.setItem("attemptsWon", attemptsArray);
+        }
+      } else {
+        localStorage.setItem("winStreak", "0");
+      }
+      //track unguessed names
+      if (localStorage.getItem("winStreak") === "0") {
+        let namesExist = localStorage.getItem("names");
+        if (namesExist) {
+          namesExist = namesExist.split(",");
+          namesExist.push(this.answer);
+          namesExist = String(namesExist);
+          localStorage.setItem("names", namesExist);
+        } else {
+          let namesArray = [];
+          namesArray.push(this.answer);
+          namesArray = String(namesArray);
+          localStorage.setItem("names", namesArray);
+        }
+      }
+      //keep track of times played
+      let timesPlayedExists = localStorage.getItem("timesPlayed");
+      let timesPlayed = timesPlayedExists
+        ? String(Number(timesPlayedExists) + 1)
+        : "1";
+      localStorage.setItem("timesPlayed", timesPlayed);
     },
   },
 };
@@ -324,6 +442,9 @@ img {
   border-radius: 5px;
   background-color: white;
   color: grey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .big-button {
   width: 70px;
@@ -349,15 +470,19 @@ img {
 
 @media only screen and (max-width: 400px) {
   .answer-grid {
-    margin-bottom: 50px;
+    margin-bottom: 40px;
   }
   .grid-tile {
     height: 50px;
     width: 50px;
   }
-  .keyboard-row button {
+  .keyboard-row .keyboard-key {
     height: 40px;
     width: 30px;
+  }
+  .keyboard-row .big-button {
+    height: 40px;
+    width: 45px;
   }
 }
 </style>

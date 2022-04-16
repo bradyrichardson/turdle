@@ -1,7 +1,7 @@
 <template>
   <div class="turdle-view">
     <h1>Turdle</h1>
-    <TurdleComponent msg="hello" />
+    <TurdleComponent></TurdleComponent>
   </div>
 </template>
 
@@ -10,7 +10,7 @@
 import TurdleComponent from "@/components/TurdleComponent.vue";
 
 export default {
-  name: "TurtleView",
+  name: "TurdleView",
   components: {
     TurdleComponent,
   },
