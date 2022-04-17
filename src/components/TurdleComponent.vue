@@ -1,5 +1,6 @@
 <template>
   <div class="turdle">
+    <StatsComponent :finished="finished"></StatsComponent>
     <div class="turtle-image">
       <img src="../assets/turtle.jpg" />
       <p>What is this turtle's name?</p>
@@ -95,8 +96,13 @@
 <script>
 import namesArray from "../names.vue";
 import seedrandom from "seedrandom";
+import StatsComponent from "@/components/StatsComponent.vue";
 
 export default {
+  name: "TurdleComponent",
+  components: {
+    StatsComponent,
+  },
   data() {
     return {
       answer: "",
@@ -398,21 +404,19 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .turdle {
   background-color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 img {
   border-radius: 100px;
   border: solid 3px #000;
 }
-
 .answer-grid {
-  margin-bottom: 100px;
+  margin-bottom: 40px;
 }
 .tile-row {
   display: flex;
@@ -467,7 +471,6 @@ img {
 .unmarked {
   background-color: #fff;
 }
-
 @media only screen and (max-width: 400px) {
   .answer-grid {
     margin-bottom: 40px;
