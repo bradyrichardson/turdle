@@ -1,6 +1,6 @@
 <template>
   <div class="turdle-view">
-    <h1>Turdle</h1>
+    <h1>Turdle&#128034;</h1>
     <TurdleComponent></TurdleComponent>
   </div>
 </template>
