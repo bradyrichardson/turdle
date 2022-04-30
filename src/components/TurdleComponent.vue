@@ -7,6 +7,7 @@
       :bestStreak="bestStreak"
       :namesMissed="namesMissed"
       :attempts="attempts"
+      :answer="answer"
     >
     </StatsComponent>
     <div class="turtle-image">
@@ -381,7 +382,6 @@ export default {
       this.currentRow++;
       this.currentTile = 0;
       //set these things so that a refresh doesn't reset the current game
-      this.setAnswer();
       this.setGrid();
       this.setRow();
       this.setKeyboard();
@@ -397,10 +397,6 @@ export default {
       var rng = seedrandom(hashDay);
       var hashIndex = Math.floor((rng() * 100000) % namesArray.length);
       this.answer = namesArray[hashIndex].toUpperCase();
-      this.setAnswer();
-    },
-    setAnswer() {
-      localStorage.setItem("answer", this.answer);
     },
     setGrid() {
       localStorage.setItem("currentGrid", JSON.stringify(this.grid));

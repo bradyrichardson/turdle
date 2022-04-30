@@ -6,12 +6,12 @@
           <h1>Today's &#128034;</h1>
           <div v-if="winner">
             <strong>
-              <p class="winner">{{ this.answer }}</p>
+              <p class="winner">{{ this.displayAnswer }}</p>
             </strong>
           </div>
           <div v-else>
             <strong>
-              <p class="loser">{{ this.answer }}</p>
+              <p class="loser">{{ this.displayAnswer }}</p>
             </strong>
           </div>
         </div>
@@ -72,12 +72,13 @@ export default {
     bestStreak: String,
     namesMissed: Array,
     attempts: Array,
+    answer: String,
   },
   data() {
     return {
       copyMessage: "",
       displayMessage: "",
-      answer: "",
+      displayAnswer: "",
     };
   },
   created() {
@@ -118,7 +119,7 @@ export default {
       this.displayMessage = "Couldn't copy, something went wrong.";
     },
     getAnswer() {
-      this.answer = String(localStorage.getItem("answer")).toUpperCase();
+      this.displayAnswer = this.answer;
     },
   },
 };
