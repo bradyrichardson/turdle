@@ -28,4 +28,4 @@ EDIT: Was formally Turdle but now is Turdl.
 
 You can play Turdl at https://turdl.io/ !!!
 
-This is my own Wordle clone built as a fun side project and on it is entirely on the front-end using the VueJs framework and localStorage for caching (but now that you know that, don't cheat! :) ).
+This is my own Wordle clone that I made as a fun side project and it is built entirely on the front-end using the VueJs framework and localStorage for caching (but now that you know that, don't cheat! :) ).
