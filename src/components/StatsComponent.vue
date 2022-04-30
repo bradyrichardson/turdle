@@ -3,10 +3,17 @@
     <div class="modal-mask">
       <div class="modal-container">
         <div class="name">
-          <h1>Today's &#128034;:</h1>
-          <strong>
-            <p>{{ this.$root.$data.answer }}</p>
-          </strong>
+          <h1>Today's &#128034;</h1>
+          <div v-if="winner">
+            <strong>
+              <p class="winner">{{ this.answer }}</p>
+            </strong>
+          </div>
+          <div v-else>
+            <strong>
+              <p class="loser">{{ this.answer }}</p>
+            </strong>
+          </div>
         </div>
         <div class="stats">
           <div class="stats-item record">
@@ -37,7 +44,18 @@
           </div>
         </div>
         <div class="share-button">
-          <button type="button" name="button">SHARE</button>
+          <button
+            type="button"
+            v-clipboard:copy="copyMessage"
+            v-clipboard:success="onCopy"
+            v-clipboard:error="onError"
+            @click.prevent="shareStats"
+          >
+            SHARE
+          </button>
+          <div v-if="displayMessage" class="display-message">
+            {{ displayMessage }}
+          </div>
         </div>
       </div>
     </div>
@@ -49,22 +67,58 @@ export default {
   name: "StatsComponent",
   props: {
     finished: Boolean,
+    winner: Boolean,
+    winStreak: String,
+    bestStreak: String,
+    namesMissed: Array,
+    attempts: Array,
   },
-  computed: {
-    winStreak() {
-      return localStorage.getItem("winStreak");
+  data() {
+    return {
+      copyMessage: "",
+      displayMessage: "",
+      answer: "",
+    };
+  },
+  created() {
+    this.getCopyMessage();
+    this.getAnswer();
+  },
+  methods: {
+    shareStats() {
+      let score = "X";
+      if (this.winner) {
+        score = String(this.$root.$data.copyMessage.length / 5);
+      }
+      let copyString = `Check out my Turdl score: ${score}/6\n\n`;
+      let count = 0;
+      for (let emoji of this.$root.$data.copyMessage) {
+        copyString += emoji;
+        count++;
+        if (count % 5 === 0) {
+          copyString += "\n";
+        }
+      }
+      copyString += "\nPlay Turdl at www.turdl.io!";
+      this.copyMessage = copyString;
     },
-    bestStreak() {
-      return localStorage.getItem("bestStreak");
-    },
-    namesMissed() {
-      if (!localStorage.getItem("names")) {
+    getCopyMessage() {
+      let copyMessage = localStorage.getItem("copyMessage");
+      if (!copyMessage) {
         return;
       }
-      return localStorage.getItem("names").split(",");
+      this.$root.$data.copyMessage = localStorage
+        .getItem("copyMessage")
+        .split(",");
     },
-    attempts() {
-      return JSON.parse(localStorage.getItem("attemptsWon"));
+    onCopy() {
+      this.displayMessage = "Copied score to clipboard!";
+    },
+    onError() {
+      this.displayMessage = "Couldn't copy, something went wrong.";
+    },
+    getAnswer() {
+      this.answer = String(localStorage.getItem("answer")).toUpperCase();
     },
   },
 };
@@ -135,13 +189,12 @@ h2 {
 .name p {
   font-size: 30px;
   color: #fff;
-  background-color: #90ee90;
   padding: 10px 20px;
   border-radius: 20px;
   margin: 0 0 5px 0;
 }
 .stats-item {
-  width: 60%;
+  width: 70%;
   margin: 10px;
   background-color: #c5c7c4;
   padding: 10px;
@@ -156,12 +209,21 @@ button {
   font-family: "Avenir", "Helvetica", "sans-serif";
   border-radius: 20px;
 }
+.display-message {
+  margin-top: 5px;
+}
+.winner {
+  background-color: #90ee90;
+}
+.loser {
+  background-color: #ff6766;
+}
 @media only screen and (max-width: 400px) {
   h1 {
     font-size: 20px;
   }
   h2 {
-    font-size: 10px;
+    font-size: 15px;
   }
   .name p {
     font-size: 20px;

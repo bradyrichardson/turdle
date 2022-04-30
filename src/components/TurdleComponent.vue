@@ -1,6 +1,14 @@
 <template>
   <div class="turdle">
-    <StatsComponent :finished="finished"></StatsComponent>
+    <StatsComponent
+      :finished="finished"
+      :winner="winner"
+      :winStreak="winStreak"
+      :bestStreak="bestStreak"
+      :namesMissed="namesMissed"
+      :attempts="attempts"
+    >
+    </StatsComponent>
     <div class="turtle-image">
       <img src="../assets/turtle.jpg" />
       <p>What is this turtle's name?</p>
@@ -113,10 +121,14 @@ export default {
       currentRow: 0,
       currentTile: 0,
       finished: false,
-      //fakeDate: 26,
+      //fakeDate: 51,
       winner: false,
       error: false,
       errorMsg: "",
+      winStreak: "",
+      bestStreak: "",
+      namesMissed: [],
+      attempts: [],
       grid: [
         [
           { class: "grid-tile", letter: "" },
@@ -198,12 +210,17 @@ export default {
     };
   },
   created() {
+    this.reset();
+    this.getWinStatus();
+    this.getFinishState();
     this.getName();
     this.getGrid();
     this.getRow();
     this.getKeyboard();
-    this.getFinishState();
-    this.reset();
+    this.getWinStreak();
+    this.getBestStreak();
+    this.getAttempts();
+    this.getNamesMissed();
   },
   computed: {
     currentDate() {
@@ -233,15 +250,6 @@ export default {
     },
   },
   methods: {
-    getName() {
-      var today = new Date();
-      var hashDay =
-        today.getDate() * 31 + today.getMonth() * 31 + today.getYear() * 31;
-      var rng = seedrandom(hashDay);
-      var hashIndex = Math.floor((rng() * 100000) % namesArray.length);
-      this.answer = namesArray[hashIndex].toUpperCase();
-      this.$root.$data.answer = this.answer;
-    },
     markTile(value) {
       if (
         this.lock === true &&
@@ -292,6 +300,7 @@ export default {
       }
     },
     enterAnswer() {
+      //check for invalid answers
       if (
         this.currentTile < 4 ||
         this.grid[this.currentRow][4]["letter"] === ""
@@ -311,7 +320,8 @@ export default {
         this.error = false;
       }
       var answerKey = this.answer.split("");
-      var answerEntry = []; //need this for marking incorrect keys
+      var answerEntry = [];
+      //check and mark the correct tiles/keys
       for (var i = 0; i < answerKey.length; i++) {
         answerEntry.push(this.grid[this.currentRow][i]["letter"]);
         if (this.grid[this.currentRow][i]["letter"] === answerKey[i]) {
@@ -322,8 +332,12 @@ export default {
           answerEntry[i] = " ";
         }
       }
+      //check and mark the partially correct tiles/keys
       for (i = 0; i < answerKey.length; i++) {
-        if (answerKey.includes(this.grid[this.currentRow][i]["letter"])) {
+        if (
+          answerKey.includes(this.grid[this.currentRow][i]["letter"]) &&
+          this.grid[this.currentRow][i]["class"] !== "grid-tile marked correct"
+        ) {
           this.grid[this.currentRow][i]["class"] = "grid-tile marked partial";
           setClass = "partial";
           var answerKeyArg = this.grid[this.currentRow][i]["letter"];
@@ -336,6 +350,7 @@ export default {
           ] = " ";
         }
       }
+      //mark remaining keys as incorrect
       for (i = 0; i < answerKey.length; i++) {
         if (this.grid[this.currentRow][i]["class"] === "grid-tile marked") {
           this.grid[this.currentRow][i]["class"] = "grid-tile marked incorrect";
@@ -347,28 +362,47 @@ export default {
           this.markKey(answerEntry[i], setClass);
         }
       }
+      //user's answer matches the answer
       if (this.userAnswer.toLowerCase() === this.answer.toLowerCase()) {
         this.winner = true;
+        if (!localStorage.getItem("winStatus")) {
+          localStorage.setItem("winStatus", String(this.winner));
+        }
       }
+      //game is over
       if (this.currentRow === 5 || this.winner === true) {
         this.saveResults();
-        this.saveGrid();
-        this.saveRow();
-        this.saveKeyboard();
+        this.setGrid();
+        this.setRow();
+        this.setKeyboard();
         return;
       }
+      //if the game is not over, continue and update the row/tile position
       this.currentRow++;
       this.currentTile = 0;
-      //save these things so that a refresh doesn't reset the current game
-      this.saveGrid();
-      this.saveRow();
-      this.saveKeyboard();
+      //set these things so that a refresh doesn't reset the current game
+      this.setAnswer();
+      this.setGrid();
+      this.setRow();
+      this.setKeyboard();
     },
     displayError(message) {
       this.error = true;
       this.errorMsg = message;
     },
-    saveGrid() {
+    getName() {
+      var today = new Date();
+      var hashDay =
+        today.getDate() * 31 + today.getMonth() * 31 + today.getYear() * 31;
+      var rng = seedrandom(hashDay);
+      var hashIndex = Math.floor((rng() * 100000) % namesArray.length);
+      this.answer = namesArray[hashIndex].toUpperCase();
+      this.setAnswer();
+    },
+    setAnswer() {
+      localStorage.setItem("answer", this.answer);
+    },
+    setGrid() {
       localStorage.setItem("currentGrid", JSON.stringify(this.grid));
     },
     getGrid() {
@@ -378,7 +412,7 @@ export default {
       }
       this.grid = JSON.parse(currentGrid);
     },
-    saveRow() {
+    setRow() {
       localStorage.setItem("currentRow", String(this.currentRow));
     },
     getRow() {
@@ -388,7 +422,7 @@ export default {
       }
       this.currentRow = Number(currentRow);
     },
-    saveKeyboard() {
+    setKeyboard() {
       localStorage.setItem("currentKeyboard", JSON.stringify(this.keyboard));
     },
     getKeyboard() {
@@ -398,7 +432,8 @@ export default {
       }
       this.keyboard = JSON.parse(currentKeyboard);
     },
-    saveFinishState() {
+    setFinishState() {
+      this.finished = true;
       localStorage.setItem("finishState", String(this.finished));
     },
     getFinishState() {
@@ -408,70 +443,93 @@ export default {
       }
       this.finished = Boolean(finishState);
     },
-    reset() {
-      let prevDate = localStorage.getItem("date");
-      if (!prevDate) {
-        localStorage.setItem("date", this.currentDate);
+    getWinStatus() {
+      let winStatus = localStorage.getItem("winStatus");
+      if (!winStatus) {
         return;
       }
-      if (Number(prevDate) !== this.currentDate) {
-        localStorage.removeItem("currentGrid");
-        localStorage.removeItem("currentRow");
-        localStorage.removeItem("currentKeyboard");
-        localStorage.removeItem("finishState");
-      }
-      localStorage.setItem("date", String(this.currentDate));
+      this.winner = Boolean(winStatus);
     },
-    saveResults() {
-      this.finished = true;
-      this.saveFinishState();
-      if (this.winner === true) {
-        //track winstreak
-        let winStreakExists = localStorage.getItem("winStreak");
-        let winStreak;
-        if (winStreakExists) {
-          winStreak = String(Number(winStreakExists) + 1);
+    setWinStreak() {
+      let winStreakExists = localStorage.getItem("winStreak");
+      let winStreak;
+      if (winStreakExists) {
+        winStreak = String(Number(winStreakExists) + 1);
+      } else {
+        winStreak = "1";
+      }
+      localStorage.setItem("winStreak", winStreak);
+      this.winStreak = winStreak;
+    },
+    getWinStreak() {
+      let winStreak = localStorage.getItem("winStreak");
+      if (!winStreak) {
+        return;
+      }
+      this.winStreak = winStreak;
+    },
+    setBestStreak() {
+      let bestStreakExists = localStorage.getItem("bestStreak");
+      let bestStreak;
+      if (bestStreakExists) {
+        if (
+          Number(localStorage.getItem("winStreak")) > Number(bestStreakExists)
+        ) {
+          bestStreak = localStorage.getItem("winStreak");
         } else {
-          winStreak = "1";
-        }
-        localStorage.setItem("winStreak", winStreak);
-        //track bestStreak
-        let bestStreakExists = localStorage.getItem("bestStreak");
-        if (bestStreakExists) {
-          if (
-            Number(localStorage.getItem("winStreak")) > Number(bestStreakExists)
-          ) {
-            let bestStreak = localStorage.getItem("winStreak");
-            localStorage.setItem("bestStreak", bestStreak);
-          }
-        } else {
-          let bestStreak = localStorage.getItem("winStreak");
-          localStorage.setItem("bestStreak", bestStreak);
-        }
-        //track num of tries for each attempt
-        let attemptsArray = localStorage.getItem("attemptsWon");
-        if (attemptsArray) {
-          attemptsArray = JSON.parse(attemptsArray);
-          if (this.currentRow < 6) {
-            attemptsArray[this.currentRow].num += 1;
-          }
-          localStorage.setItem("attemptsWon", JSON.stringify(attemptsArray));
-        } else {
-          attemptsArray = [
-            { id: "1 Attempt ", num: 0 },
-            { id: "2 Attempts", num: 0 },
-            { id: "3 Attempts", num: 0 },
-            { id: "4 Attempts", num: 0 },
-            { id: "5 Attempts", num: 0 },
-            { id: "6 Attempts", num: 0 },
-          ];
-          attemptsArray[this.currentRow].num += 1;
-          localStorage.setItem("attemptsWon", JSON.stringify(attemptsArray));
+          bestStreak = bestStreakExists;
         }
       } else {
-        localStorage.setItem("winStreak", "0");
+        bestStreak = localStorage.getItem("winStreak");
       }
-      //track unguessed names
+      localStorage.setItem("bestStreak", bestStreak);
+      this.bestStreak = bestStreak;
+    },
+    getBestStreak() {
+      let bestStreak = localStorage.getItem("bestStreak");
+      if (!bestStreak) {
+        return;
+      }
+      this.bestStreak = bestStreak;
+    },
+    //set the winning streak and best streak if the player lost
+    setStreaksAtLoss() {
+      localStorage.setItem("winStreak", "0");
+      if (localStorage.getItem("timesPlayed") === "1") {
+        localStorage.setItem("bestStreak", "0");
+      }
+    },
+    setAttempts() {
+      let attemptsArray = localStorage.getItem("attemptsWon");
+      if (attemptsArray) {
+        attemptsArray = JSON.parse(attemptsArray);
+        if (this.currentRow < 6) {
+          attemptsArray[this.currentRow].num += 1;
+        }
+        localStorage.setItem("attemptsWon", JSON.stringify(attemptsArray));
+        this.attempts = attemptsArray;
+      } else {
+        attemptsArray = [
+          { id: "1 Attempt ", num: 0 },
+          { id: "2 Attempts", num: 0 },
+          { id: "3 Attempts", num: 0 },
+          { id: "4 Attempts", num: 0 },
+          { id: "5 Attempts", num: 0 },
+          { id: "6 Attempts", num: 0 },
+        ];
+        attemptsArray[this.currentRow].num += 1;
+        localStorage.setItem("attemptsWon", JSON.stringify(attemptsArray));
+        this.attempts = attemptsArray;
+      }
+    },
+    getAttempts() {
+      let attemptsArray = localStorage.getItem("attemptsWon");
+      if (!attemptsArray) {
+        return;
+      }
+      this.attempts = JSON.parse(attemptsArray);
+    },
+    setNamesMissed() {
       if (localStorage.getItem("winStreak") === "0") {
         let namesExist = localStorage.getItem("names");
         if (namesExist) {
@@ -486,9 +544,16 @@ export default {
           localStorage.setItem("names", namesArray);
         }
       }
-      //keep track of times played
+    },
+    getNamesMissed() {
+      let namesMissed = localStorage.getItem("names");
+      if (!namesMissed) {
+        return;
+      }
+      this.namesMissed = namesMissed.split(",");
+    },
+    setTimesPlayed() {
       let timesPlayedExists = localStorage.getItem("timesPlayed");
-      console.log(timesPlayedExists);
       let timesPlayed;
       if (timesPlayedExists) {
         timesPlayed = String(Number(timesPlayedExists) + 1);
@@ -496,6 +561,59 @@ export default {
         timesPlayed = "1";
       }
       localStorage.setItem("timesPlayed", timesPlayed);
+    },
+    reset() {
+      let prevDate = localStorage.getItem("date");
+      if (!prevDate) {
+        localStorage.setItem("date", this.currentDate);
+        return;
+      }
+      if (Number(prevDate) !== this.currentDate) {
+        localStorage.removeItem("currentGrid");
+        localStorage.removeItem("currentRow");
+        localStorage.removeItem("currentKeyboard");
+        localStorage.removeItem("finishState");
+        localStorage.removeItem("winStatus");
+        localStorage.removeItem("answer");
+        this.$root.$data.copyMessage = [];
+      }
+      localStorage.setItem("date", String(this.currentDate));
+    },
+    saveResults() {
+      this.createCopyMessage();
+      this.setTimesPlayed();
+      if (this.winner === true) {
+        this.setWinStreak();
+        this.setBestStreak();
+        this.setAttempts();
+      } else {
+        this.setStreaksAtLoss();
+      }
+      this.setNamesMissed();
+      this.getWinStreak();
+      this.getBestStreak();
+      this.getAttempts();
+      this.getNamesMissed();
+      this.setFinishState();
+    },
+    //create the message which the user can copy and share
+    createCopyMessage() {
+      let copyMessage = [];
+      for (let row of this.grid) {
+        for (let tile of row) {
+          if (tile.class === "grid-tile") {
+            break;
+          } else if (tile.class === "grid-tile marked correct") {
+            copyMessage.push(String.fromCodePoint(0x1f422));
+          } else if (tile.class === "grid-tile marked partial") {
+            copyMessage.push(String.fromCodePoint(0x1f7e8));
+          } else {
+            copyMessage.push(String.fromCodePoint(0x2b1b));
+          }
+        }
+      }
+      this.$root.$data.copyMessage = copyMessage;
+      localStorage.setItem("copyMessage", String(copyMessage));
     },
   },
 };
