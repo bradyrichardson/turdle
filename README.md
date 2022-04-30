@@ -1,4 +1,4 @@
-# turdle
+# Turdl
 
 ## Project setup
 ```
