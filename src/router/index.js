@@ -6,7 +6,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    name: "turdle",
+    name: "turdl",
     component: TurdleView,
   },
 ];

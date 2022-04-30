@@ -99,7 +99,7 @@ export default {
           copyString += "\n";
         }
       }
-      copyString += "\nPlay Turdl at www.turdl.io!";
+      copyString += "\nPlay Turdl at https://turdl.io/ !";
       this.copyMessage = copyString;
     },
     getCopyMessage() {
