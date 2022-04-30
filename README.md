@@ -22,3 +22,10 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+EDIT: Was formally Turdle but now is Turdl. 
+
+You can play Turdl at https://turdl.io/ !!!
+
+This is my own Wordle clone built as a fun side project and on it is entirely on the front-end using the VueJs framework and localStorage for caching (but now that you know that, don't cheat! :) ).
