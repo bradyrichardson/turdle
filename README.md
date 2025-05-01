@@ -31,6 +31,7 @@ You used to be able to play Turdl at https://turdl.io/, however, it is no longer
 This is my own Wordle clone that I made as a fun side project and it is built entirely on the front-end using the VueJs framework and localStorage for caching (but now that you know that, don't cheat! :) ).
 
 **Turdl Demo**
-https://github.com/user-attachments/assets/a37c8795-98d0-4959-abc0-8088a0f4fa47
+[![Turdl Demo](./Screenshot%202025-05-01%20at%203.15.18 PM.png)](https://github.com/user-attachments/assets/1e13a66d-0b6c-43b1-a71e-448c21456e55)
+
 
 
